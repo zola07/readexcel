@@ -1,9 +1,12 @@
 import os
 import time
-from datetime import datetime
+import datetime
+
 import pandas as pd
 
-start_time = time.process_time()
+# start_time = time.process_time()
+
+
 listOfFiles = list()
 
 for root, dirs, files in os.walk('./2018'):
@@ -14,10 +17,24 @@ for file_path in listOfFiles:
         continue
     sheet = pd.read_excel(file_path, header=2)
     sheet = sheet.loc[:, ~sheet.columns.str.contains('^Unnamed', na=False)]
-
     headers = list(sheet.columns.values)[:7]
+    sheet1 = pd.read_excel(file_path, header=0)
+    sheet1 = sheet1.loc[:, ~sheet1.columns.str.contains('^Unnamed', na=False)]
+    headers1 = list(sheet1.columns.values)[:5]
 
-    for date in headers:
+    if isinstance(headers1[2],int):
+        week = headers1[2]
+    elif isinstance(headers1[3],int):
+        week = headers1[3]
+    else:
+        print(type(headers1[2]),type(headers1[3]))
+        print(f'Error {headers1[2]} {headers1[3]} on {file_path}')
+        break
+
+    end_day =  week * 7
+    start_day = end_day - 7
+
+    for date, day_of_year in zip(headers, range(start_day,end_day)):
         if isinstance(date, str):
             if date[-1] in ['.', '/']:
                 date = date[:-1]
@@ -27,32 +44,45 @@ for file_path in listOfFiles:
                 separator = '.'
 
             date = date.replace(f'{separator}{separator}', separator)
-
-            date_list = date.split(separator)
-            date_list = date_list[:3]
-            try:
-                day = int(date_list[0])
-                month = int(date_list[1])
+            if isinstance(date, str):
+                date_list = date.split(separator)
+                date_list = date_list[:3]
                 try:
-                    year = int(date_list[2])
+                    day = int(date_list[0])
+                    month = int(date_list[1])
+                    try:
+                        year = int(date_list[2])
+                    except:
+                        year = 2018
                 except:
-                    year = 2018
-            except:
-                print(f'Error {date} on {file_path}. {date_list} separator: {separator}')
-                break
-
-            try:
-                date = datetime(year, month, day)
-            except:
-                print(f'Error {date} on {file_path}')
-                break
-
-        if not isinstance(date, datetime):
+                    print(f'Error {date} on {file_path}. {date_list} separator: {separator}')
+                    break
+                    
+                try:
+                    date = datetime.date(year, month, day)
+                except:
+                    try:
+                        date = datetime.date(year, day, month)
+                    except:
+                        print(type(date))
+                        print(f'Error {date} on {file_path}')
+                        break       
+            
+        if isinstance(date, datetime.date):
+            d = datetime.date(2018, 1, 1) + datetime.timedelta(day_of_year)
+            if type(d) == type(date):
+                if d != date:
+                    date = d
+            else:
+                if d != date.date():
+                    date = d 
+        else:
             print(type(date))
-            print(f'Error {date} on {file_path}')
+            print(f'Error {date} on {file_path}')      
+      
 
 
-
+   
 
 
 
