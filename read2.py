@@ -1,7 +1,7 @@
 import os
 import time
 import datetime
-
+import calendar
 import pandas as pd
 
 # start_time = time.process_time()
@@ -18,23 +18,25 @@ for file_path in listOfFiles:
     sheet = pd.read_excel(file_path, header=2)
     sheet = sheet.loc[:, ~sheet.columns.str.contains('^Unnamed', na=False)]
     headers = list(sheet.columns.values)[:7]
-    sheet1 = pd.read_excel(file_path, header=0)
-    sheet1 = sheet1.loc[:, ~sheet1.columns.str.contains('^Unnamed', na=False)]
-    headers1 = list(sheet1.columns.values)[:5]
+    # sheet1 = pd.read_excel(file_path, header=0)
+    # sheet1 = sheet1.loc[:, ~sheet1.columns.str.contains('^Unnamed', na=False)]
+    # headers1 = list(sheet1.columns.values)[:5]
 
-    if isinstance(headers1[2],int):
-        week = headers1[2]
-    elif isinstance(headers1[3],int):
-        week = headers1[3]
-    else:
-        print(type(headers1[2]),type(headers1[3]))
-        print(f'Error {headers1[2]} {headers1[3]} on {file_path}')
-        break
+    week = int(file_path.split('-')[2])
+    
+    # if isinstance(headers1[2],int):
+    #     week = headers1[2]
+    # elif isinstance(headers1[3],int):
+    #     week = headers1[3]
+    # else:
+    #     print(type(headers1[2]),type(headers1[3]))
+    #     print(f'Error {headers1[2]} {headers1[3]} on {file_path}')
+    #     break
 
-    end_day =  week * 7
-    start_day = end_day - 7
+    # end_day =  week * 7
+    # start_day = end_day - 7
 
-    for date, day_of_year in zip(headers, range(start_day,end_day)):
+    for date in headers:
         if isinstance(date, str):
             if date[-1] in ['.', '/']:
                 date = date[:-1]
@@ -67,18 +69,26 @@ for file_path in listOfFiles:
                         print(type(date))
                         print(f'Error {date} on {file_path}')
                         break       
-            
-        if isinstance(date, datetime.date):
-            d = datetime.date(2018, 1, 1) + datetime.timedelta(day_of_year)
-            if type(d) == type(date):
-                if d != date:
-                    date = d
-            else:
-                if d != date.date():
-                    date = d 
-        else:
-            print(type(date))
-            print(f'Error {date} on {file_path}')      
+        weekNumber = date.isocalendar()[1]
+        if not weekNumber == week:
+            print(week,weekNumber)
+            print(f'Error {date} on {file_path}')
+            break       
+        # if isinstance(date, datetime.date):
+        #     # if not date or range(week):
+        #         print(f'Error {date} on {file_path}')
+        #         break       
+
+        #     d = datetime.date(2018, 1, 1) + datetime.timedelta(day_of_year)
+        #     if type(d) == type(date):
+        #         if d != date:
+        #             date = d
+        #     else:
+        #         if d != date.date():
+        #             date = d 
+        # else:
+        #     print(type(date))
+        #     print(f'Error {date} on {file_path}')      
       
 
 
@@ -104,7 +114,6 @@ for file_path in listOfFiles:
     # break
 
     # for index, row in sheet.iterrows():
-
     #     print(row)
     #     break
 
@@ -116,7 +125,7 @@ for file_path in listOfFiles:
     # print('  '.join(map(str, sheet1)))
     # print("\n")
 
-    # for index, row in df.iterrows():
+    # for index, row in sheet.iterrows():
     #     print(row)
 
     # for i in range(2, sheet.shape[0]):
@@ -128,3 +137,4 @@ for file_path in listOfFiles:
     # print(time.process_time() - start_time, "seconds")
 
 # print(time.process_time() - start_time, "seconds")
+
